@@ -2,16 +2,23 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_countdown_timer/current_remaining_time.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:quiz/model/get_questions.dart';
 import 'package:quiz/helper/hide.dart';
 import 'package:recase/recase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
+var timeSpent;
+CurrentRemainingTime? remainingTime;
+List<QuestionsResponse> listQuestionsResponse = [];
+List<QuestionsResponse> listAllReviewQuestionsResponse = [];
+List<QuestionsResponse> listCorrectReviewQuestionsResponse = [];
+List<QuestionsResponse> listWrongReviewQuestionsResponse = [];
+List<QuestionsResponse> listNotAttemptedReviewQuestionsResponse = [];
 List<BoxShadow> elevation({required Color color, required int elevation}) {
   return [
     BoxShadow(color: color.withOpacity(0.6), offset: Offset(0.0, 4.0), blurRadius: 3.0 * elevation, spreadRadius: -1.0 * elevation),
@@ -40,6 +47,17 @@ const Color dPurpleGradientLeft = Color(0xFF7A08FA);
 const Color dPurpleGradientRight = Color(0xFFAD3BFC);
 const Color dRedGradientRight = Color(0xFFE5366A);
 const Color dRedGradientLeft = Color(0xFFFE806F);
+
+const appLightGray = Color(0xFFE7ECF2);
+const appMainLimeGreen = Color(0xFF96a038);
+const appMainLimeGreen2 = Color(0xFF75bf43);
+const appMainGreen = Color(0xFF00C853);
+const appMainPink = Color(0xFFb81e4f);
+const appMainViolet = Color(0xFF87449a);
+const appMainDarkGrey = Color(0xFF253d47);
+const appMainOrange = Color(0xFFba5927);
+const appGray = Color(0xFFadb4b9);
+const appDarkText = Color(0xFF2F2F2F);
 
 displayImage(imagePath, {double radius = 30.0, double? height,double? width}) {
   return CachedNetworkImage(
@@ -388,10 +406,11 @@ InputDecoration textDecorNoBorder(
   );
 }
 
-showDialogOk({String? message,BuildContext? context,Widget? target,bool? status,bool replace = false}) {
+showDialogOk({String? message,BuildContext? context,Widget? target,bool? status,bool replace = false,bool dismiss = true}) {
   // flutter defined function
   showDialog(
     context: context!,
+    barrierDismissible: dismiss,
     builder: (BuildContext context) {
       // return object of type Dialog
       return AlertDialog(
@@ -444,28 +463,30 @@ showSuccessfulDialog({String? message,BuildContext? context,Widget? target,bool?
   );
 }
 
-showDialogYesNo(String message,String alert,BuildContext context,Widget target) {
+showDialogYesNo({String? message,BuildContext? context,Widget? target,bool replace = false}) {
   // flutter defined function
   showDialog(
-    context: context,
+    context: context!,
     builder: (BuildContext context) {
       // return object of type Dialog
       return AlertDialog(
-        title: new Text(alert),
-        content: new Text(message),
+        title:  Text("Alert"),
+        content:  Text(message!),
         actions: <Widget>[
           // usually buttons at the bottom of the dialog
-          new FlatButton(
-            child: new Text("No"),
+           FlatButton(
+            child:  Text("No"),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
-          new FlatButton(
+           FlatButton(
             child: new Text("Yes"),
             onPressed: () {
-              goTo(context, target);
+              print("hey");
               Navigator.pop(context);
+              goTo(context, target!,replace: replace);
+
             },
           ),
         ],
